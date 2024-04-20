@@ -10,6 +10,129 @@
 
 #include <JuceHeader.h>
 
+/*
+ Roadmap
+ 
+ 1. Figure out how to split the audio into 3 separate bands.
+
+ 2. Create parameters to control where this split happens.
+
+ 3. Prove that splitting into 3 bands produces no audible artifacts.
+
+ 4. Create audio parameters for the 3 compressors that will live on each band.
+
+ 5. Add the 2 remaining compressors (we already have 1).
+
+ 6. Add the ability to mute/solo/bypass individual compressors.
+
+ 7. Add input and output gain because compression lowers the output level.
+
+ 8. Clean up anything that needs cleaning up.
+ 
+ */
+
+//==============================================================================
+
+namespace Params
+{
+enum Names
+{
+    Low_Mid_Crossover_Freq,
+    Mid_High_Crossover_Freq,
+    Threshold_Low_Band,
+    Threshold_Mid_Band,
+    Threshold_High_Band,
+    
+    Attack_Low_Band,
+    Attack_Mid_Band,
+    Attack_High_Band,
+    
+    Release_Low_Band,
+    Release_Mid_Band,
+    Release_High_Band,
+    
+    Ratio_Low_Band,
+    Ratio_Mid_Band,
+    Ratio_High_Band,
+    
+    Bypassed_Low_Band,
+    Bypassed_Mid_Band,
+    Bypassed_High_Band,
+}; //end enum Names
+
+inline const std::map<Names, juce::String>& GetParams()
+{
+    static std::map<Names, juce::String> params =
+    {
+        {Low_Mid_Crossover_Freq, "Low-Mid Crossover Freq"},
+        {Mid_High_Crossover_Freq,"Mid-High Crossover Freq"},
+        
+        {Threshold_Low_Band, "Threshold Low Band"},
+        {Threshold_Mid_Band, "Threshold Mid Band"},
+        {Threshold_High_Band, "Threshold High Band"},
+        
+        {Attack_Low_Band, "Attack Low Band"},
+        {Attack_Mid_Band, "Attack Mid Band"},
+        {Attack_High_Band, "Attack High Band"},
+        
+        {Release_Low_Band, "Release Low Band"},
+        {Release_Mid_Band, "Release Mid Band"},
+        {Release_High_Band, "Release High Band"},
+        
+        {Ratio_Low_Band, "Ratio Low Band"},
+        {Ratio_Mid_Band, "Ratio Mid Band"},
+        {Ratio_High_Band, "Ratio High Band"},
+        
+        {Bypassed_Low_Band, "Bypassed Low Band"},
+        {Bypassed_Mid_Band, "Bypassed Mid Band"},
+        {Bypassed_High_Band, "Bypassed High Band"},
+    };
+    return params;
+}
+
+} //end namespace Params
+
+//==============================================================================
+struct CompressorBand
+{
+    juce::AudioParameterFloat* attack { nullptr };
+    juce::AudioParameterFloat* release { nullptr };
+    juce::AudioParameterFloat* threshold { nullptr };
+    juce::AudioParameterChoice* ratio { nullptr };
+    
+    juce::AudioParameterBool* bypassed { nullptr };
+    
+    void prepare(const juce::dsp::ProcessSpec& spec)
+    {
+        compressor.prepare(spec);
+    }
+    
+    void updateCompressorSettings()
+    {
+        compressor.setAttack(attack->get());
+        compressor.setRelease(release->get());
+        compressor.setThreshold(threshold->get());
+        compressor.setRatio(ratio->getCurrentChoiceName().getFloatValue());
+    }
+    
+    void process(juce::AudioBuffer<float>& buffer)
+    {
+        auto block = juce::dsp::AudioBlock<float>(buffer);
+
+        auto context = juce::dsp::ProcessContextReplacing<float>(block);
+
+        context.isBypassed = bypassed->get();
+
+        compressor.process(context);
+    }
+    
+    
+private:
+    juce::dsp::Compressor<float> compressor;
+
+};
+
+
 //==============================================================================
 /**
 */
@@ -61,7 +184,10 @@ public:
 
 private:
     
-    juce::dsp::Compressor<float> compressor;
+    CompressorBand compressor;
+    
+    
+    //juce::dsp::Compressor<float> compressor;
     
     /*
      The APVTS has a member function that returns pointers to the parameters that we created.
@@ -72,11 +198,13 @@ private:
 
      We will use the same types that we used when we created our parameters. We will store these member variables as pointers because that's what the APVTS function will return.
      */
-    juce::AudioParameterFloat* attack { nullptr };
-    juce::AudioParameterFloat* release { nullptr };
-    juce::AudioParameterFloat* threshold { nullptr };
-    juce::AudioParameterChoice* ratio { nullptr };
-    juce::AudioParameterBool* bypassed { nullptr };
+    //juce::AudioParameterFloat* attack { nullptr };
+    //juce::AudioParameterFloat* release { nullptr };
+    //juce::AudioParameterFloat* threshold { nullptr };
+    //juce::AudioParameterChoice* ratio { nullptr };
+    //juce::AudioParameterBool* bypassed { nullptr };
+    //CompressorBand compressor;
+    
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleMBCompAudioProcessor)
 };
