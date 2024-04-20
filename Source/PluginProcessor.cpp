@@ -29,6 +29,46 @@ SimpleMBCompAudioProcessor::~SimpleMBCompAudioProcessor()
 }
 
 //==============================================================================
+
+juce::AudioProcessorValueTreeState::ParameterLayout SimpleMBCompAudioProcessor::createParameterLayout()
+{
+    APVTS::ParameterLayout layout;
+    using namespace juce;
+    
+    layout.add(std::make_unique<AudioParameterFloat>("Threshold",
+                                                     "Threshold",
+                                                     NormalisableRange<float>(-60, 12, 1, 1),
+                                                     0));
+    
+    auto attackReleaseRange = NormalisableRange<float>{ 5, 500, 1, 1 };
+    
+    layout.add(std::make_unique<AudioParameterFloat>("Attack",
+                                                     "Attack",
+                                                     attackReleaseRange,
+                                                     50));
+    
+    layout.add(std::make_unique<AudioParameterFloat>("Release",
+                                                     "Release",
+                                                     attackReleaseRange,
+                                                     250));
+    
+    auto choices = std::vector<double>{ 1, 1.5, 2, 3, 4, 5, 6, 7, 8, 10, 15, 20, 50, 100 };
+    
+    juce::StringArray sa;
+    
+    for( auto choice : choices )
+    {
+        sa.add( juce::String(choice, 1) );
+    }
+    
+    layout.add(std::make_unique<AudioParameterChoice>("Ratio", "Ratio", sa, 3));
+
+    return layout;
+}
+
+
+//==============================================================================
+
 const juce::String SimpleMBCompAudioProcessor::getName() const
 {
     return JucePlugin_Name;
@@ -166,7 +206,8 @@ bool SimpleMBCompAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* SimpleMBCompAudioProcessor::createEditor()
 {
-    return new SimpleMBCompAudioProcessorEditor (*this);
+    //return new SimpleMBCompAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================

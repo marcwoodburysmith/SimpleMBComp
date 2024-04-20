@@ -52,6 +52,12 @@ public:
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
+    
+    using APVTS = juce::AudioProcessorValueTreeState;
+    static APVTS::ParameterLayout createParameterLayout();
+    
+    APVTS apvts{*this, nullptr, "Parameters", createParameterLayout()};
+    
 
 private:
     //==============================================================================
