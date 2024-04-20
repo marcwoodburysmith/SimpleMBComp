@@ -133,8 +133,27 @@ void SimpleMBCompAudioProcessor::changeProgramName (int index, const juce::Strin
 //==============================================================================
 void SimpleMBCompAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
+    //Use this method as the place to do any pre-playback
     // initialisation that you need..
+    juce::dsp::ProcessSpec spec;
+    /*
+    It needs to know maximum number of samples it'll process at one time
+    */
+    spec.maximumBlockSize = samplesPerBlock;
+    /*
+    It needs to know the number of channels
+    This compressor can handle multiple channels.
+    we'll use the number of output channels our compressor is configured with.
+    */
+    spec.numChannels = getTotalNumOutputChannels();
+    /*
+    And it need to know the sample rate
+    */
+    spec.sampleRate = sampleRate;
+    /*
+    Now we can pass it to the compressor, which will prepare it.
+    */
+    compressor.prepare(spec);
 }
 
 void SimpleMBCompAudioProcessor::releaseResources()
@@ -190,12 +209,25 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
+    
+    auto block = juce::dsp::AudioBlock<float>(buffer);
+    /*
+     Now that we've got our block we can create our context.
+     */
+    auto context = juce::dsp::ProcessContextReplacing<float>(block);
+    /*
+     Now that we've got our context we can process audio with our compressor.
+     */
+    compressor.process(context);
+    
+    /*
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
 
         // ..do something to the data...
     }
+     */
 }
 
 //==============================================================================
