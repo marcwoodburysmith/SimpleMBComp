@@ -19,7 +19,7 @@
 
  3. Prove that splitting into 3 bands produces no audible artifacts. DONE
 
- 4. Create audio parameters for the 3 compressors that will live on each band.
+ 4. Create audio parameters for the 3 compressors that will live on each band. DONE
 
  5. Add the 2 remaining compressors (we already have 1).
 
@@ -184,7 +184,13 @@ public:
 
 private:
     
-    CompressorBand compressor;
+    
+    std::array<CompressorBand, 3> compressors;
+    
+    //Create aliases to each one
+    CompressorBand& lowBandComp = compressors[0];
+    CompressorBand& midBandComp = compressors[1];
+    CompressorBand& highBandComp = compressors[2];
     
     using Filter = juce::dsp::LinkwitzRileyFilter<float>;
     
