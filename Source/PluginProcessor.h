@@ -13,11 +13,11 @@
 /*
  Roadmap
  
- 1. Figure out how to split the audio into 3 separate bands.
+ 1. Figure out how to split the audio into 3 separate bands. DONE
 
- 2. Create parameters to control where this split happens.
+ 2. Create parameters to control where this split happens. DONE
 
- 3. Prove that splitting into 3 bands produces no audible artifacts.
+ 3. Prove that splitting into 3 bands produces no audible artifacts. DONE
 
  4. Create audio parameters for the 3 compressors that will live on each band.
 
