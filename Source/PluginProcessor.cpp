@@ -78,6 +78,9 @@ SimpleMBCompAudioProcessor::SimpleMBCompAudioProcessor()
     floatHelper(lowMidCrossover, Names::Low_Mid_Crossover_Freq);
     floatHelper(midHighCrossover, Names::Mid_High_Crossover_Freq);
     
+    floatHelper(inputGainParam, Names::Gain_In);
+    floatHelper(outputGainParam, Names::Gain_Out);
+    
     LP1.setType(juce::dsp::LinkwitzRileyFilterType::lowpass);
     HP1.setType(juce::dsp::LinkwitzRileyFilterType::highpass);
     
@@ -124,6 +127,17 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleMBCompAudioProcessor::
     using namespace Params;
     
     const auto& params = GetParams();
+    
+    auto gainRange = juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f);
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>(params.at(Names::Gain_In),
+                                                           params.at(Names::Gain_In),
+                                                           gainRange,
+                                                           0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(params.at(Names::Gain_Out),
+                                                           params.at(Names::Gain_Out),
+                                                           gainRange,
+                                                           0.f));
     
     layout.add(std::make_unique<AudioParameterFloat>(params.at(Names::Threshold_Low_Band),
                                                      params.at(Names::Threshold_Low_Band),
@@ -344,6 +358,12 @@ void SimpleMBCompAudioProcessor::prepareToPlay (double sampleRate, int samplesPe
 //    invAP2.prepare(spec);
 //    
 //    invAPBuffer.setSize(spec.numChannels, samplesPerBlock);
+    
+    inputGain.prepare(spec);
+    outputGain.prepare(spec);
+        
+    inputGain.setRampDurationSeconds(0.05); //50 ms
+    outputGain.setRampDurationSeconds(0.05);
 
     
     for( auto& buffer : filterBuffers )
@@ -397,6 +417,11 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     for( auto& compressor : compressors )
         compressor.updateCompressorSettings();
+    
+    inputGain.setGainDecibels(inputGainParam->get());
+    outputGain.setGainDecibels(outputGainParam->get());
+    
+    applyGain(buffer, inputGain);
     
     for( auto& fb : filterBuffers )
     {
@@ -500,6 +525,8 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
             }
         }
     }
+    
+    applyGain(buffer, outputGain);
     
 }
 

@@ -66,6 +66,9 @@ enum Names
     Solo_Low_Band,
     Solo_Mid_Band,
     Solo_High_Band,
+    
+    Gain_In,
+    Gain_Out,
 }; //end enum Names
 
 inline const std::map<Names, juce::String>& GetParams()
@@ -102,6 +105,9 @@ inline const std::map<Names, juce::String>& GetParams()
         {Solo_Low_Band, "Solo Low Band"},
         {Solo_Mid_Band, "Solo Mid Band"},
         {Solo_High_Band, "Solo High Band"},
+        
+        {Gain_In, "Gain In"},
+        {Gain_Out, "Gain Out"}
     };
     return params;
 }
@@ -225,25 +231,19 @@ private:
     juce::AudioParameterFloat* midHighCrossover { nullptr };
     
     std::array<juce::AudioBuffer<float>, 3> filterBuffers;
-
-
-    //juce::dsp::Compressor<float> compressor;
     
-    /*
-     The APVTS has a member function that returns pointers to the parameters that we created.
-
-     It does not make sense to call this member function for every single parameter every time process block is called. The cost of looking up those parameters could get expensive quickly, and this is one of the optimizations we can do.
-
-     Let's create some member variables that will act as cached versions of our audio parameters for this compressor instance.
-
-     We will use the same types that we used when we created our parameters. We will store these member variables as pointers because that's what the APVTS function will return.
-     */
-    //juce::AudioParameterFloat* attack { nullptr };
-    //juce::AudioParameterFloat* release { nullptr };
-    //juce::AudioParameterFloat* threshold { nullptr };
-    //juce::AudioParameterChoice* ratio { nullptr };
-    //juce::AudioParameterBool* bypassed { nullptr };
-    //CompressorBand compressor;
+    juce::dsp::Gain<float> inputGain, outputGain;
+    juce::AudioParameterFloat* inputGainParam { nullptr };
+    juce::AudioParameterFloat* outputGainParam { nullptr };
+    
+    template<typename T, typename U>
+    void applyGain(T& buffer, U& gain)
+    {
+        auto block = juce::dsp::AudioBlock<float>(buffer);
+        auto ctx = juce::dsp::ProcessContextReplacing<float>(block);
+        gain.process(ctx);
+    }
+    
     
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleMBCompAudioProcessor)
