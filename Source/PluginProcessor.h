@@ -244,6 +244,9 @@ private:
         gain.process(ctx);
     }
     
+    void updateState();
+    
+    void splitBands(const juce::AudioBuffer<float>& inputBuffer);
     
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleMBCompAudioProcessor)
