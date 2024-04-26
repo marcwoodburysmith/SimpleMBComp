@@ -21,13 +21,13 @@
 
  4. Create audio parameters for the 3 compressors that will live on each band. DONE
 
- 5. Add the 2 remaining compressors (we already have 1).
+ 5. Add the 2 remaining compressors (we already have 1). DONE
 
- 6. Add the ability to mute/solo/bypass individual compressors.
+ 6. Add the ability to mute/solo/bypass individual compressors. DONE
 
- 7. Add input and output gain because compression lowers the output level.
+ 7. Add input and output gain because compression lowers the output level. DONE
 
- 8. Clean up anything that needs cleaning up.
+ 8. Clean up anything that needs cleaning up. DONE
  
  */
 
