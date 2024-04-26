@@ -148,8 +148,36 @@ struct AnalyzerButton : juce::ToggleButton
     juce::Path randomPath;
 };
 
+//==============================================================================
 
+struct RotarySlider : juce::Slider
+{
+    RotarySlider() :
+    juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag,
+                 juce::Slider::TextEntryBoxPosition::NoTextBox)
+    { }
+};
  
+
+template<
+    typename Attachment,
+    typename ParamName,
+    typename SliderType,
+    typename Params,
+    typename APVTS
+        >
+void makeAttachment(std::unique_ptr<Attachment>& attachment,
+                    ParamName name,
+                    SliderType& slider,
+                    Params& params,
+                    APVTS& apvts)
+{
+    attachment = std::make_unique<Attachment>(apvts,
+                                              params.at(name),
+                                              slider);
+}
+
+
  struct Placeholder : juce::Component
  {
      Placeholder();
@@ -165,7 +193,18 @@ struct AnalyzerButton : juce::ToggleButton
  
 struct GlobalControls : juce::Component
 {
+    GlobalControls(juce::AudioProcessorValueTreeState& apvts);
+    
     void paint(juce::Graphics& g) override;
+    
+    void resized() override;
+    
+private:
+    RotarySlider inGainSlider, lowMidXoverSlider, midHighXoverSlider, outGainSlider;
+    
+    using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
+    std::unique_ptr<Attachment> lowMidXoverSliderAttachment, midHighXoverSliderAttachment, inGainSliderAttachment, outGainSliderAttachment;
+    
 
 };
 
@@ -189,7 +228,7 @@ private:
     SimpleMBCompAudioProcessor& audioProcessor;
     
     Placeholder controlBar, analyzer, /*globalControls,*/ bandControls;
-    GlobalControls globalControls;
+    GlobalControls globalControls {audioProcessor.apvts};
     
     
 
