@@ -159,6 +159,8 @@ struct RotarySlider : juce::Slider
 };
  
 
+//==============================================================================
+
 template<
     typename Attachment,
     typename ParamName,
@@ -176,6 +178,24 @@ void makeAttachment(std::unique_ptr<Attachment>& attachment,
                                               params.at(name),
                                               slider);
 }
+
+
+template<
+    typename Name,
+    typename APVTS,
+    typename Params
+        >
+juce::RangedAudioParameter& getParam(const Name& pos, APVTS& apvts, const Params& params)
+{
+    auto param = apvts.getParameter(params.at(pos));
+    
+    jassert(param != nullptr);
+    
+    return *param;
+}
+
+//==============================================================================
+
 
 
  struct Placeholder : juce::Component
@@ -200,7 +220,8 @@ struct GlobalControls : juce::Component
     void resized() override;
     
 private:
-    RotarySlider inGainSlider, lowMidXoverSlider, midHighXoverSlider, outGainSlider;
+    //RotarySlider inGainSlider, lowMidXoverSlider, midHighXoverSlider, outGainSlider;
+    std::unique_ptr<RotarySliderWithLabels> inGainSlider, lowMidXoverSlider, midHighXoverSlider, outGainSlider;
     
     using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
     std::unique_ptr<Attachment> lowMidXoverSliderAttachment, midHighXoverSliderAttachment, inGainSliderAttachment, outGainSliderAttachment;
