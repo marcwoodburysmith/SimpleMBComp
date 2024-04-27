@@ -9,6 +9,39 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+template<typename T>
+bool truncateKiloValue(T& value)
+{
+    if( value > static_cast<T>(999) )
+    {
+        value /= static_cast<T>(1000);
+        return true;
+    }
+    
+    return false;
+}
+
+
+juce::String getValString(const juce::RangedAudioParameter& param, bool getLow, juce::String suffix)
+{
+    juce::String str;
+    
+    auto val = (getLow ? param.getNormalisableRange().start : param.getNormalisableRange().end);
+    
+    bool useK = truncateKiloValue(val);
+    str << val;
+    
+    if( useK )
+        str << "k";
+    
+    
+    str << suffix;
+    
+    return str;
+}
+    
+    
+
 //==============================================================================
 void LookAndFeel::drawRotarySlider(juce::Graphics & g,
                                    int x,
@@ -203,11 +236,13 @@ juce::String RotarySliderWithLabels::getDisplayString() const
     {
         float val = getValue();
         
-        if( val > 999.f )
-        {
-            val /= 1000.f; //1001 / 1000 = 1.001
-            addK = true;
-        }
+//        if( val > 999.f )
+//        {
+//            val /= 1000.f; //1001 / 1000 = 1.001
+//            addK = true;
+//        }
+      
+        addK = truncateKiloValue(val);
         
         str = juce::String(val, (addK ? 2 : 0));
     }
@@ -282,6 +317,19 @@ GlobalControls::GlobalControls(juce::AudioProcessorValueTreeState& apvts)
                          Names::Gain_Out,
                          *outGainSlider);
     
+    addLabelPairs(lowMidXoverSlider->labels,
+                      getParamHelper(Names::Low_Mid_Crossover_Freq),
+                      "Hz");
+    addLabelPairs(midHighXoverSlider->labels,
+                  getParamHelper(Names::Mid_High_Crossover_Freq),
+                  "Hz");
+    addLabelPairs(inGainSlider->labels,
+                  getParamHelper(Names::Gain_In),
+                  "dB");
+    addLabelPairs(outGainSlider->labels,
+                  getParamHelper(Names::Gain_Out),
+                  "dB");
+    
     addAndMakeVisible(*inGainSlider);
     addAndMakeVisible(*lowMidXoverSlider);
     addAndMakeVisible(*midHighXoverSlider);
@@ -308,17 +356,27 @@ void GlobalControls::paint(juce::Graphics &g)
 
 void GlobalControls::resized()
 {
-    auto bounds = getLocalBounds();
+    auto bounds = getLocalBounds().reduced(5);
     
     using namespace juce;
     FlexBox flexBox;
     flexBox.flexDirection = FlexBox::Direction::row;
     flexBox.flexWrap = FlexBox::Wrap::noWrap;
     
+    auto spacer = FlexItem().withWidth(4);
+    auto endCap = FlexItem().withWidth(6);
+    
+    flexBox.items.add(endCap);
     flexBox.items.add(FlexItem(*inGainSlider).withFlex(1.f));
+    flexBox.items.add(spacer);
     flexBox.items.add(FlexItem(*lowMidXoverSlider).withFlex(1.f));
+    flexBox.items.add(spacer);
     flexBox.items.add(FlexItem(*midHighXoverSlider).withFlex(1.f));
+    flexBox.items.add(spacer);
     flexBox.items.add(FlexItem(*outGainSlider).withFlex(1.f));
+    flexBox.items.add(endCap);
+    
+    
     
     flexBox.performLayout(bounds);
 } //end GlobalControls::resized()
