@@ -229,6 +229,22 @@ void addLabelPairs(Labels& labels, const ParamType& param, const SuffixType& suf
      
 
  };
+
+
+struct CompressorBandControls : juce::Component
+{
+    CompressorBandControls();
+    void resized() override;
+    
+    void paint(juce::Graphics& g) override;
+    
+    
+private:
+    RotarySlider attackSlider, releaseSlider, thresholdSlider, ratioSlider;
+
+};
+
+
  
 struct GlobalControls : juce::Component
 {
@@ -267,8 +283,10 @@ private:
     // access the processor object that created it.
     SimpleMBCompAudioProcessor& audioProcessor;
     
-    Placeholder controlBar, analyzer, /*globalControls,*/ bandControls;
+    Placeholder controlBar, analyzer /*globalControls,*/ /*bandControls*/;
     GlobalControls globalControls {audioProcessor.apvts};
+    CompressorBandControls bandControls;
+    
     
     
 
