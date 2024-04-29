@@ -272,6 +272,12 @@ juce::String RotarySliderWithLabels::getDisplayString() const
     
     return str;
 }
+
+void RotarySliderWithLabels::changeParam(juce::RangedAudioParameter *p)
+{
+    param = p;
+    repaint();
+}
 //==============================================================================
 
 Placeholder::Placeholder()
@@ -298,8 +304,63 @@ void drawModuleBackground(juce::Graphics& g,
 
 //==============================================================================
 
-CompressorBandControls::CompressorBandControls()
+CompressorBandControls::CompressorBandControls(juce::AudioProcessorValueTreeState& apv) :
+apvts(apv),
+attackSlider(nullptr, "ms", "ATTACK"),
+releaseSlider(nullptr, "ms", "RELEASE"),
+thresholdSlider(nullptr, "dB", "THRESH"),
+ratioSlider(nullptr, "", "RATIO")
 {
+    
+    using namespace Params;
+    const auto& params = GetParams();
+    
+    auto getParamHelper = [&apvts = this->apvts, &params](const auto& pos) -> auto&
+    {
+        return getParam(pos, apvts, params);
+    };
+    
+    attackSlider.changeParam(&getParamHelper(Names::Attack_Mid_Band));
+    releaseSlider.changeParam(&getParamHelper(Names::Release_Mid_Band));
+    thresholdSlider.changeParam(&getParamHelper(Names::Threshold_Mid_Band));
+    ratioSlider.changeParam(&getParamHelper(Names::Ratio_Mid_Band));
+    
+    addLabelPairs(attackSlider.labels, getParamHelper(Names::Attack_Mid_Band), "ms");
+    addLabelPairs(releaseSlider.labels, getParamHelper(Names::Release_Mid_Band), "ms");
+    addLabelPairs(thresholdSlider.labels, getParamHelper(Names::Threshold_Mid_Band), "dB");
+    
+    ratioSlider.labels.add({0.f, "1:1"});
+    auto ratioParam = dynamic_cast<juce::AudioParameterChoice*>(&getParamHelper(Names::Ratio_Mid_Band));
+    //ratioSlider.labels.add({1.f, ratioParam->choices.getReference(ratioParam->choices.size() - 1) + ":1"});
+    
+    
+    ratioSlider.labels.add({1.f, juce::String(ratioParam->choices.getReference(ratioParam->choices.size() - 1).getIntValue()) + ":1"});
+    
+    auto makeAttachmentHelper = [&params, &apvts = this->apvts](auto& attachment, const auto& name, auto& slider)
+    {
+        makeAttachment(attachment, name, slider, params, apvts);
+    };
+    
+    makeAttachmentHelper(attackSliderAttachment,
+                             Names::Attack_Mid_Band,
+                             attackSlider);
+        
+    makeAttachmentHelper(releaseSliderAttachment,
+                         Names::Release_Mid_Band,
+                         releaseSlider);
+    
+    makeAttachmentHelper(thresholdSliderAttachment,
+                         Names::Threshold_Mid_Band,
+                         thresholdSlider);
+    
+    makeAttachmentHelper(ratioSliderAttachment,
+                         Names::Ratio_Mid_Band,
+                         ratioSlider);
+    
+    
+    
+    
+    
     addAndMakeVisible(attackSlider);
     addAndMakeVisible(releaseSlider);
     addAndMakeVisible(thresholdSlider);
@@ -333,8 +394,10 @@ void CompressorBandControls::resized()
 
 void CompressorBandControls::paint(juce::Graphics &g)
 {
+    
     using namespace juce;
     auto bounds = getLocalBounds();
+    
     
 
 //    g.setColour(Colours::blueviolet);
@@ -375,19 +438,19 @@ GlobalControls::GlobalControls(juce::AudioProcessorValueTreeState& apvts)
     
     using RSWL = RotarySliderWithLabels;
 
-    inGainSlider = std::make_unique<RSWL>(gainInParam,
+    inGainSlider = std::make_unique<RSWL>(&gainInParam,
                                           "dB",
                                           "INPUT TRIM");
     
-    lowMidXoverSlider = std::make_unique<RSWL>(lowMidParam,
+    lowMidXoverSlider = std::make_unique<RSWL>(&lowMidParam,
                                                "Hz",
                                                "LOW-MID X-OVER");
     
-    midHighXoverSlider = std::make_unique<RSWL>(midHighParam,
+    midHighXoverSlider = std::make_unique<RSWL>(&midHighParam,
                                                 "Hz",
                                                 "MID-HIGH X-OVER");
     
-    outGainSlider = std::make_unique<RSWL>(gainOutParam,
+    outGainSlider = std::make_unique<RSWL>(&gainOutParam,
                                            "dB",
                                            "OUTPUT TRIM");
     
@@ -494,6 +557,7 @@ SimpleMBCompAudioProcessorEditor::SimpleMBCompAudioProcessorEditor (SimpleMBComp
     
     //addAndMakeVisible(controlBar);
     //addAndMakeVisible(analyzer);
+    setLookAndFeel(&lnf);
     addAndMakeVisible(globalControls);
     addAndMakeVisible(bandControls);
     
@@ -502,6 +566,7 @@ SimpleMBCompAudioProcessorEditor::SimpleMBCompAudioProcessorEditor (SimpleMBComp
 
 SimpleMBCompAudioProcessorEditor::~SimpleMBCompAudioProcessorEditor()
 {
+    setLookAndFeel(nullptr);
 }
 
 //==============================================================================

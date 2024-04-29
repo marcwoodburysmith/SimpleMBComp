@@ -89,21 +89,21 @@ struct LookAndFeel : juce::LookAndFeel_V4
 
 struct RotarySliderWithLabels : juce::Slider
 {
-    RotarySliderWithLabels(juce::RangedAudioParameter& rap, const juce::String& unitSuffix,
+    RotarySliderWithLabels(juce::RangedAudioParameter* rap, const juce::String& unitSuffix,
                            const juce::String& title /*= "NO TITLE" */) :
     juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag,
                  juce::Slider::TextEntryBoxPosition::NoTextBox),
-    param(&rap),
+    param(rap),
     suffix(unitSuffix)
     {
         setName(title);
-        setLookAndFeel(&lnf);
+        //setLookAndFeel(&lnf);
     }
     
-    ~RotarySliderWithLabels()
-    {
-        setLookAndFeel(nullptr);
-    }
+//    ~RotarySliderWithLabels()
+//    {
+//        setLookAndFeel(nullptr);
+//    }
     
     struct LabelPos
     {
@@ -117,8 +117,10 @@ struct RotarySliderWithLabels : juce::Slider
     juce::Rectangle<int> getSliderBounds() const;
     int getTextHeight() const { return 14; }
     juce::String getDisplayString() const;
+    
+    void changeParam(juce::RangedAudioParameter* p);
 private:
-    LookAndFeel lnf;
+    //LookAndFeel lnf;
     
     juce::RangedAudioParameter* param;
     juce::String suffix;
@@ -233,14 +235,17 @@ void addLabelPairs(Labels& labels, const ParamType& param, const SuffixType& suf
 
 struct CompressorBandControls : juce::Component
 {
-    CompressorBandControls();
+    CompressorBandControls(juce::AudioProcessorValueTreeState& apvts);
     void resized() override;
     
     void paint(juce::Graphics& g) override;
     
-    
+    juce::AudioProcessorValueTreeState& apvts;
 private:
-    RotarySlider attackSlider, releaseSlider, thresholdSlider, ratioSlider;
+    RotarySliderWithLabels attackSlider, releaseSlider, thresholdSlider, ratioSlider;
+    
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attackSliderAttachment, releaseSliderAttachment, thresholdSliderAttachment, ratioSliderAttachment;
+    
 
 };
 
@@ -279,13 +284,14 @@ public:
     void resized() override;
 
 private:
+    LookAndFeel lnf; 
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     SimpleMBCompAudioProcessor& audioProcessor;
     
     Placeholder controlBar, analyzer /*globalControls,*/ /*bandControls*/;
     GlobalControls globalControls {audioProcessor.apvts};
-    CompressorBandControls bandControls;
+    CompressorBandControls bandControls {audioProcessor.apvts};
     
     
     
