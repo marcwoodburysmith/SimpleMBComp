@@ -259,6 +259,11 @@ private:
     
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attackSliderAttachment, releaseSliderAttachment, thresholdSliderAttachment, ratioSliderAttachment;
     
+    juce::ToggleButton bypassButton, soloButton, muteButton, lowBand, midBand, highBand;
+    
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> bypassButtonAttachment, soloButtonAttachment, muteButtonAttachment;
+    
+    
 
 };
 
