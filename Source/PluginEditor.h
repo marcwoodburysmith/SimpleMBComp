@@ -263,7 +263,9 @@ private:
     
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> bypassButtonAttachment, soloButtonAttachment, muteButtonAttachment;
     
+    juce::Component::SafePointer<CompressorBandControls> safePtr { this };
     
+    void updateAttachments();
 
 };
 
