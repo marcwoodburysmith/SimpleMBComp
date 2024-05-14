@@ -38,8 +38,21 @@ ratioSlider(nullptr, "")
     addAndMakeVisible(ratioSlider);
     
     bypassButton.setName("X");
+    bypassButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::yellow);
+    bypassButton.setColour(juce::TextButton::ColourIds::buttonColourId,
+                           juce::Colours::black);
+    
     soloButton.setName("S");
+    soloButton.setColour(juce::TextButton::ColourIds::buttonOnColourId,
+                             juce::Colours::limegreen);
+    soloButton.setColour(juce::TextButton::ColourIds::buttonColourId,
+                         juce::Colours::black);
+        
     muteButton.setName("M");
+    muteButton.setColour(juce::TextButton::ColourIds::buttonOnColourId,
+                             juce::Colours::red);
+    muteButton.setColour(juce::TextButton::ColourIds::buttonColourId,
+                         juce::Colours::black);
     
     addAndMakeVisible(bypassButton);
     addAndMakeVisible(soloButton);
@@ -51,8 +64,24 @@ ratioSlider(nullptr, "")
     
     
     lowBand.setName("Low");
+    lowBand.setColour(juce::TextButton::ColourIds::buttonOnColourId,
+                          juce::Colours::grey);
+    lowBand.setColour(juce::TextButton::ColourIds::buttonColourId,
+                      juce::Colours::black);
+    
+    
     midBand.setName("Mid");
+    midBand.setColour(juce::TextButton::ColourIds::buttonOnColourId,
+                          juce::Colours::grey);
+    midBand.setColour(juce::TextButton::ColourIds::buttonColourId,
+                      juce::Colours::black);
+    
+    
     highBand.setName("High");
+    highBand.setColour(juce::TextButton::ColourIds::buttonOnColourId,
+                           juce::Colours::grey);
+    highBand.setColour(juce::TextButton::ColourIds::buttonColourId,
+                       juce::Colours::black);
     
     lowBand.setRadioGroupId(1);
     midBand.setRadioGroupId(1);
@@ -163,6 +192,50 @@ void CompressorBandControls::buttonClicked(juce::Button *button)
     
     updateSoloMuteBypassToggleStates(*button);
     
+    updateActiveBandFillColors(*button);
+    
+    
+}
+
+void CompressorBandControls::updateActiveBandFillColors(juce::Button &clickedButton)
+{
+    jassert(activeBand != nullptr);
+    DBG( "active band: " << activeBand->getName() );
+    
+    if( clickedButton.getToggleState() == false )
+    {
+        resetActiveBandColors();
+    }
+    
+    else
+    {
+        refreshBandButtonColors(*activeBand, clickedButton);
+    }    
+}
+
+
+void CompressorBandControls::refreshBandButtonColors(juce::Button &band, juce::Button &colorSource)
+{
+    band.setColour(juce::TextButton::ColourIds::buttonOnColourId,
+                   colorSource.findColour(juce::TextButton::ColourIds::buttonOnColourId));
+    
+    band.setColour(juce::TextButton::ColourIds::buttonColourId,
+                   colorSource.findColour(juce::TextButton::ColourIds::buttonOnColourId));
+    
+    band.repaint();
+    
+}
+
+
+
+void CompressorBandControls::resetActiveBandColors()
+{
+    activeBand->setColour(juce::TextButton::ColourIds::buttonOnColourId,
+                          juce::Colours::grey);
+    
+    activeBand->setColour(juce::TextButton::ColourIds::buttonColourId,
+                          juce::Colours::black);
+    activeBand->repaint();
     
 }
 
@@ -234,7 +307,7 @@ void CompressorBandControls::updateAttachments()
                 Names::Solo_Low_Band,
                 Names::Bypassed_Low_Band,
             };
-            
+            activeBand = &lowBand;
             break;
         }
         case Mid:
@@ -249,7 +322,7 @@ void CompressorBandControls::updateAttachments()
                 Names::Solo_Mid_Band,
                 Names::Bypassed_Mid_Band,
             };
-            
+            activeBand = &midBand;
             break;
         }
         case High:
@@ -264,6 +337,7 @@ void CompressorBandControls::updateAttachments()
                 Names::Solo_High_Band,
                 Names::Bypassed_High_Band,
             };
+            activeBand = &highBand;
             break;
         }
             
