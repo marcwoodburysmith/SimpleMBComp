@@ -53,5 +53,7 @@ private:
     
     static void refreshBandButtonColors(juce::Button& band, juce::Button& colorSource);
     
+    void updateBandSelectButtonStates();
+    
 
 };

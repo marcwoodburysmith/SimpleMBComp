@@ -103,6 +103,9 @@ ratioSlider(nullptr, "")
         
     updateAttachments();
     
+    updateSliderEnablements();
+    updateBandSelectButtonStates();
+    
     addAndMakeVisible(lowBand);
     addAndMakeVisible(midBand);
     addAndMakeVisible(highBand);
@@ -238,6 +241,54 @@ void CompressorBandControls::resetActiveBandColors()
     activeBand->repaint();
     
 }
+
+
+void CompressorBandControls::updateBandSelectButtonStates()
+{
+    using namespace Params;
+    
+    std::vector<std::array<Names, 3>> paramsToCheck
+    {
+        {Names::Solo_Low_Band, Names::Mute_Low_Band, Names::Bypassed_Low_Band},
+        {Names::Solo_Mid_Band, Names::Mute_Mid_Band, Names::Bypassed_Mid_Band},
+        {Names::Solo_High_Band, Names::Mute_High_Band, Names::Bypassed_High_Band}
+    };
+    
+    const auto& params = GetParams();
+    auto paramHelper = [&params, this](auto name)
+    {
+        return dynamic_cast<juce::AudioParameterBool*>(&getParam(name, apvts, params));
+    };
+    
+    for(size_t i = 0; i < paramsToCheck.size(); ++i)
+    {
+        
+        auto& list = paramsToCheck[i];
+        auto* bandButton = i == 0 ? &lowBand :
+                            i == 1 ? &midBand :
+                                    &highBand;
+        
+        if( auto* solo = paramHelper(list[0]);
+                   solo->get() )
+            {
+                refreshBandButtonColors(*bandButton, soloButton);
+            }
+            else if( auto* mute = paramHelper(list[1]);
+               mute->get() )
+            {
+                refreshBandButtonColors(*bandButton, muteButton);
+            }
+            else if( auto* bypass = paramHelper(list[2]);
+               bypass->get() )
+            {
+                refreshBandButtonColors(*bandButton, bypassButton);
+            }
+        } //end for() loop
+}
+
+
+
+
 
 void CompressorBandControls::updateSliderEnablements()
 {
