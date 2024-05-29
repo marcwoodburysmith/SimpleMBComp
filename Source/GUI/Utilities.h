@@ -86,5 +86,8 @@ void addLabelPairs(Labels& labels, const ParamType& param, const SuffixType& suf
 }
 
 
-void drawModuleBackground(juce::Graphics& g,
-                          juce::Rectangle<int> bounds);;
+//void drawModuleBackground(juce::Graphics& g,
+//                          juce::Rectangle<int> bounds);;
+
+juce::Rectangle<int> drawModuleBackground(juce::Graphics& g,
+                                          juce::Rectangle<int> bounds);
