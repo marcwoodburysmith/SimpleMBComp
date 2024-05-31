@@ -15,9 +15,17 @@
 #include "GUI/CompressorBandControls.h"
 #include "GUI/UtilityComponents.h"
 #include "GUI/SpectrumAnalyzer.h"
+#include "GUI/CustomButtons.h"
 
 
+struct ControlBar : juce::Component
+{
+    ControlBar();
+    void resized() override;
+    
+    AnalyzerButton analyzerButton;
 
+};
 
 //==============================================================================
 /**
@@ -41,7 +49,7 @@ private:
     // access the processor object that created it.
     SimpleMBCompAudioProcessor& audioProcessor;
     
-    Placeholder controlBar /*analyzer */ /*globalControls,*/ /*bandControls*/;
+    ControlBar controlBar;
     GlobalControls globalControls {audioProcessor.apvts};
     CompressorBandControls bandControls {audioProcessor.apvts};
     SpectrumAnalyzer analyzer {audioProcessor };

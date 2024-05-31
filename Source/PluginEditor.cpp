@@ -9,6 +9,18 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+ControlBar::ControlBar()
+{
+    analyzerButton.setToggleState(true, juce::dontSendNotification);
+    addAndMakeVisible(analyzerButton);
+}
+
+void ControlBar::resized()
+{
+    auto bounds = getLocalBounds();
+    analyzerButton.setBounds(bounds.removeFromLeft(50).withTrimmedTop(4).withTrimmedLeft(4));
+}
+
 
 //==============================================================================
 SimpleMBCompAudioProcessorEditor::SimpleMBCompAudioProcessorEditor (SimpleMBCompAudioProcessor& p)
@@ -17,7 +29,13 @@ SimpleMBCompAudioProcessorEditor::SimpleMBCompAudioProcessorEditor (SimpleMBComp
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     
+    controlBar.analyzerButton.onClick = [this]()
+    {
+        analyzer.toggleAnalysisEnablement(controlBar.analyzerButton.getToggleState());
+    };
+    
     //addAndMakeVisible(controlBar);
+    addAndMakeVisible(controlBar); 
     addAndMakeVisible(analyzer);
     setLookAndFeel(&lnf);
     addAndMakeVisible(globalControls);
