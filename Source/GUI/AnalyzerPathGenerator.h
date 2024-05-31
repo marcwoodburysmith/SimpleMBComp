@@ -10,6 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
+#include "Utilities.h"
 
 
 template<typename PathType>
@@ -37,7 +38,7 @@ struct AnalyzerPathGenerator
         auto map = [bottom, top, negativeInfinity](float v)
         {
             return juce::jmap(v,
-                              negativeInfinity, 0.f,
+                              negativeInfinity, MAX_DECIBELS,
                               //float(bottom+10),
                               bottom, top);
         };

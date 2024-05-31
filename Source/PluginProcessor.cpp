@@ -9,6 +9,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "DSP/Params.h"
+#include "GUI/Utilities.h"
 
 //==============================================================================
 SimpleMBCompAudioProcessor::SimpleMBCompAudioProcessor()
@@ -140,7 +141,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleMBCompAudioProcessor::
                                                            gainRange,
                                                            0.f));
     
-    auto thresholdRange = NormalisableRange<float>(-60, 12, 1, 1);
+    auto thresholdRange = NormalisableRange<float>(MIN_THRESHOLD, MAX_DECIBELS, 1, 1);
     
     layout.add(std::make_unique<AudioParameterFloat>(params.at(Names::Threshold_Low_Band),
                                                      params.at(Names::Threshold_Low_Band),
