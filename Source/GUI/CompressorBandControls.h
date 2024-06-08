@@ -24,6 +24,8 @@ struct CompressorBandControls : juce::Component, juce::Button::Listener
     
     void buttonClicked(juce::Button* button) override;
     
+    void toggleAllBands(bool shouldBeBypassed);
+    
     juce::AudioProcessorValueTreeState& apvts;
 private:
     RotarySliderWithLabels attackSlider, releaseSlider, thresholdSlider /*ratioSlider*/;

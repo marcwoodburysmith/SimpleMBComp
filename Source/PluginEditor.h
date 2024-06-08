@@ -24,6 +24,9 @@ struct ControlBar : juce::Component
     void resized() override;
     
     AnalyzerButton analyzerButton;
+    
+    PowerButton globalBypassButton;
+    
 
 };
 
@@ -53,6 +56,10 @@ private:
     GlobalControls globalControls {audioProcessor.apvts};
     CompressorBandControls bandControls {audioProcessor.apvts};
     SpectrumAnalyzer analyzer {audioProcessor };
+    
+    void toggleGlobalBypassState();
+    
+    std::array<juce::AudioParameterBool*, 3> getBypassParams(); 
     
     
 
