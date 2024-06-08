@@ -61,6 +61,8 @@ private:
     
     std::array<juce::AudioParameterBool*, 3> getBypassParams(); 
     
+    void updateGlobalBypassButton();
+    
     
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleMBCompAudioProcessorEditor)

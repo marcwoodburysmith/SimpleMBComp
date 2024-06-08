@@ -98,7 +98,22 @@ void SimpleMBCompAudioProcessorEditor::timerCallback()
     };
     
     analyzer.update(values);    
+    
+    updateGlobalBypassButton();
 
+}
+
+void SimpleMBCompAudioProcessorEditor::updateGlobalBypassButton()
+{
+    auto params = getBypassParams();
+    
+    bool allBandsAreBypassed = std::all_of(params.begin(),
+                                           params.end(),
+                                           [](const auto& param) { return param->get(); });
+    
+    controlBar.globalBypassButton.setToggleState( allBandsAreBypassed,
+                                                     juce::NotificationType::dontSendNotification);
+    
 }
 
 void SimpleMBCompAudioProcessorEditor::toggleGlobalBypassState()

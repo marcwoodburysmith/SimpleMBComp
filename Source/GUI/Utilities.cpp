@@ -9,6 +9,7 @@
 */
 
 #include "Utilities.h"
+#include "LookAndFeel.h"
 
 juce::String getValString(const juce::RangedAudioParameter& param, bool getLow, juce::String suffix)
 {
